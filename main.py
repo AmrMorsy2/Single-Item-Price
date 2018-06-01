@@ -26,11 +26,11 @@ def generate_data(sz,rows):
     data = ret
     return data,d,orginal
 
-def train(dim=5,epoch=1000,eta=0.001):
+def train(dim=5,epoch=10000,eta=0.0001):
     #Fetch training set
     data , d, original = generate_data(dim,50)
     weight = np.random.rand(len(data[0]))
-    weight *= 1000
+    weight *= 100
     for i in range(epoch):
         #run on all data sample
         for j in range(len(data)):
@@ -47,7 +47,7 @@ def train(dim=5,epoch=1000,eta=0.001):
 def test(dim=5):
     weight,original = train(dim)
     #Randomize a test sample
-    sample = np.append(np.array(1),np.random.randint(10, size=(1,dim)))
+    sample = np.append(np.array(1),np.random.randint(80, size=(1,dim)))
     print(sample)
     desired = np.dot(sample, weight)
     actual = np.dot(sample[1:len(sample)], original)
@@ -56,4 +56,4 @@ def test(dim=5):
     print("Absolute error = "+str(abs(desired-actual)))
     print("Error % = "+str(abs(desired-actual)/actual))
 
-test()
+test(200)
