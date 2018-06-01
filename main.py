@@ -1,26 +1,59 @@
 import numpy as np
-import math
+import statsmodels.api as sm
 
-def sigmoid(x):
-  return 1 / (1 + math.exp(-x))
+#Generate random training data
+def generate_data(sz,rows):
+    #Random number of items
+    data = np.random.randint(10, size=(rows,sz))
+    #Original Price
+    orginal = np.random.randint(100,size=sz)
+    data = sm.add_constant(data)  # Adding bias input
+    sz = sz+1
+    h , w = data.shape
+    ret = np.array([[]],dtype=np.object)
+    d = np.zeros(rows)
+    #Caluclating actual cost
+    for i in range(h):
+        sum=0
+        for j in range(1,sz):
+            sum += data[i][j]*orginal[j-1]
+        tmp = np.array([[],np.int],dtype=np.object)
+        if i==0:
+            ret = data[i]
+        else:
+            ret = np.vstack((ret,data[i]))
+        d[i] = sum
+    data = ret
+    return data,d,orginal
 
-data = np.array([[np.array([1, 3, 4, 9]), 20],[np.array([1, 7, 2, 3]), 14],[np.array([1, 2, 2, 2]), 8],
-                [np.array([1, 1, 4, 2]), 11],[np.array([1, 2, 4, 6]), 16],[np.array([1, 1, 1, 0]), 3]])
-
-def train(epoch=10000,eta=0.001):
-    weight = np.random.randint(50,size=len(data[0][0]))
-    weight = 0.451 * weight
-    print(weight)
+def train(dim=5,epoch=1000,eta=0.001):
+    #Fetch training set
+    data , d, original = generate_data(dim,50)
+    weight = np.random.rand(len(data[0]))
+    weight *= 1000
     for i in range(epoch):
         #run on all data sample
         for j in range(len(data)):
-            v = np.dot(data[j][0],weight)
+            v = np.dot(data[j], weight)
             actual = v;
-            desired = data[j][1]
+            desired = d[j]
             error= desired - actual
             rate = eta * error
-            weight += rate * data[j][0]
-    print(weight)
-    return weight
+            tmp = np.array(data[j],dtype=np.float64)
+            weight += (rate * tmp)
+    return weight,original
 
-train()
+
+def test(dim=5):
+    weight,original = train(dim)
+    #Randomize a test sample
+    sample = np.append(np.array(1),np.random.randint(10, size=(1,dim)))
+    print(sample)
+    desired = np.dot(sample, weight)
+    actual = np.dot(sample[1:len(sample)], original)
+    print("Actual = "+str(actual))
+    print("Desired = "+str(desired))
+    print("Absolute error = "+str(abs(desired-actual)))
+    print("Error % = "+str(abs(desired-actual)/actual))
+
+test()
